@@ -408,12 +408,17 @@
 (defn- ensure-scala-pair-rdd [x]
   (-> x (by-key :shuffle nil) .rdd))
 
+(defn- ensure-java-pair-rdd [x]
+  (by-key x :shuffle nil))
+
 (defn ^org.apache.spark.api.java.JavaRDD cogroup [rdd & rdds]
-  (let [rdd (ensure-scala-pair-rdd rdd)
+  (let [jrdd (ensure-java-pair-rdd rdd)
+        rdd (.rdd jrdd)
         rdds (map ensure-scala-pair-rdd rdds)
+        kClass (.kClassTag (org.apache.spark.api.java.JavaPairRDD/fromJavaRDD jrdd))
         partitioner (org.apache.spark.Partitioner/defaultPartitioner
                       rdd (scala-seq rdds))]
-    (by-key (org.apache.spark.rdd.CoGroupedRDD. (scala-seq (cons rdd rdds)) partitioner)
+    (by-key (org.apache.spark.rdd.CoGroupedRDD. (scala-seq (cons rdd rdds)) partitioner kClass)
       (map (fn [groups]
              (clj/into [] (map #(scala.collection.JavaConversions/asJavaList %)) groups))))))
 
