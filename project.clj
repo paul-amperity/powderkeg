@@ -1,4 +1,4 @@
-(defproject amperity/powderkeg "0.4.6"
+(defproject amperity/powderkeg "0.4.7"
   :description "Live-coding Spark clusters!"
   :url "https://github.com/HCADatalab/powderkeg"
   :license {:name "Eclipse Public License"
