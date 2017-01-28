@@ -75,8 +75,9 @@
 (defn connect!
   "Connects to a spark cluster. Closes existing connection.
    The no-arg version will uses the default settings (as set for example by spark-submit)."
-  ([] (connect! nil))
-  ([master-url]
+  ([] (connect! nil nil))
+  ([master-url] (connect! master-url nil))
+  ([master-url conf]
     (alter-var #'*sc*
       (fn [sc]
         (try
@@ -84,7 +85,7 @@
           (catch Exception _))
         (ou/reboot!)
         (reset! last-broadcast nil)
-        (let [conf (-> (org.apache.spark.SparkConf.) (.setAppName "repl")
+        (let [conf (-> conf (or (org.apache.spark.SparkConf.)) (.setAppName "repl")
                      (cond-> master-url (.setMaster master-url))
                      (.set "spark.driver.allowMultipleContexts" "true")
                      (.set "spark.serializer" "org.apache.spark.serializer.KryoSerializer")
